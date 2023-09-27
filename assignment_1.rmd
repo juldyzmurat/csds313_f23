@@ -1,0 +1,21 @@
+```{r}
+qnorm(0.5,2,5)
+```
+
+```{r}
+uniform_data_1 <- runif(10000, min = 6.535898, max = 13.464101)
+hist(uniform_data_1, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
+```
+```{r}
+uniform_data_2<- runif(10000, min = -1.372449, max = 5.372449)
+hist(uniform_data_2, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
+```
+```{r}
+data_norm <- rnorm(10000, mean = 2, sd = 5)
+hist(uniform_data, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency")
+```
+```{r}
+boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue")
+boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue")
+boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue")
+```
