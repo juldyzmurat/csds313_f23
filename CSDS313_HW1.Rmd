@@ -1,0 +1,91 @@
+---
+title: "CSDS313 - Homework1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Including Code
+
+You can include R code in the document as follows:
+
+```{r}
+install.packages("readr")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("rvest")
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(rvest)
+```
+
+```{r}
+# Loading dataset
+data <- read_csv("/Users/kietnguyen/Downloads/sub-est2022.csv")
+
+# Extract first digits from the numerical column i.e the estimate base population in 2020
+first_digits <- data %>%
+  filter(is.numeric(ESTIMATESBASE2020)) %>%
+  mutate(First_Digit = as.integer(substr(abs(ESTIMATESBASE2020), 1, 1)))
+
+# Calculate observed frequencies
+observed_frequencies <- first_digits %>%
+  group_by(First_Digit) %>% 
+  filter(First_Digit != 0) %>% 
+  summarise(Frequency = n())
+
+# Calculate expected frequencies according to Benford's Law
+benford_frequencies <- data.frame(First_Digit = 1:9, Expected_Frequency = log10(1 + 1/(1:9)))
+
+# Create a bar plot to compare observed and expected frequencies
+ggplot() +
+  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit), y = Frequency), stat = "identity", fill = "blue", alpha = 0.6) +
+  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis") +
+  theme_minimal()
+```
+```{r}
+#Define the URL 
+url <- "http://socr.ucla.edu/docs/resources/SOCR_Data/SOCR_Data_Dinov_020108_HeightsWeights.html"
+
+# Read the HTML page
+html_page <- read_html(url)
+
+# Extract the table from the HTML page
+table_data <- html_page %>%
+  html_table(fill = TRUE)
+
+# Assuming the table you want is the first one on the page, you can access it like this
+dataframe <- table_data[[1]]
+colnames(dataframe) <- NULL
+new_names <- c("Index","Height_Inches","Weight_Pounds")
+colnames(dataframe) <- trimws(new_names)
+dataframe <- dataframe[-1, ]
+dataframe$Height_Inches <- as.numeric(dataframe$Height_Inches)
+
+# Convert Height_Inches to numeric, and handle non-numeric values by replacing them with NA
+dataframe <- dataframe %>%
+  mutate(Height_Inches = as.numeric(Height_Inches))
+
+# Now, you can calculate the First_Digit_no
+first_digits_no <- dataframe %>%
+  mutate(First_Digit_no = as.integer(substr(abs(Height_Inches), 1, 1)))
+
+# Calculate observed frequencies
+observed_frequencies <- first_digits_no %>%
+  group_by(First_Digit_no) %>% 
+  filter(First_Digit_no != 0) %>% 
+  summarise(Frequency = n())
+
+# Calculate expected frequencies according to Benford's Law
+benford_frequencies <- data.frame(First_Digit_no = 1:9, Expected_Frequency = log10(1 + 1/(1:9)))
+
+# Create a bar plot to compare observed and expected frequencies
+ggplot() +
+  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit_no), y = Frequency), stat = "identity", fill = "blue", alpha = 0.6) +
+  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis") +
+  theme_minimal()
+```
+
