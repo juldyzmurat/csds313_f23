@@ -1,21 +1,223 @@
+---
+title: "CSDS313 - Homework1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Including Code
+You can include R code in the document as follows:
+
 ```{r}
-qnorm(0.5,2,5)
+install.packages("readr")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("rvest")
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(rvest)
 ```
 
 ```{r}
+## Code for Task 1
+# Loading dataset
+data <- read_csv("sub-est2022.csv")
+
+# Extract first digits from the numerical column i.e the estimate base population in 2020
+first_digits <- data %>%
+  filter(is.numeric(ESTIMATESBASE2020)) %>%
+  mutate(First_Digit = as.integer(substr(abs(ESTIMATESBASE2020), 1, 1)))
+
+# Calculate observed frequencies
+observed_frequencies <- first_digits %>%
+  group_by(First_Digit) %>% 
+  filter(First_Digit != 0) %>% 
+  summarise(Frequency = n())
+
+# Calculate expected frequencies according to Benford's Law
+benford_frequencies <- data.frame(First_Digit = 1:9, Expected_Frequency = log10(1 + 1/(1:9)))
+
+# Create a bar plot to compare observed and expected frequencies
+ggplot() +
+  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit), y = Frequency), stat = "identity", fill = "blue", alpha = 0.6) +
+  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis") +
+  theme_minimal()
+```
+
+```{r}
+#Define the URL 
+url <- "http://socr.ucla.edu/docs/resources/SOCR_Data/SOCR_Data_Dinov_020108_HeightsWeights.html"
+
+# Read the HTML page
+html_page <- read_html(url)
+
+# Extract the table from the HTML page
+table_data <- html_page %>%
+  html_table(fill = TRUE)
+
+# Assuming the table you want is the first one on the page, you can access it like this
+dataframe <- table_data[[1]]
+colnames(dataframe) <- NULL
+new_names <- c("Index","Height_Inches","Weight_Pounds")
+colnames(dataframe) <- trimws(new_names)
+dataframe <- dataframe[-1, ]
+dataframe$Height_Inches <- as.numeric(dataframe$Height_Inches)
+
+# Convert Height_Inches to numeric, and handle non-numeric values by replacing them with NA
+dataframe <- dataframe %>%
+  mutate(Height_Inches = as.numeric(Height_Inches))
+
+# Now, you can calculate the First_Digit_no
+first_digits_no <- dataframe %>%
+  mutate(First_Digit_no = as.integer(substr(abs(Height_Inches), 1, 1)))
+
+# Calculate observed frequencies
+observed_frequencies <- first_digits_no %>%
+  group_by(First_Digit_no) %>% 
+  filter(First_Digit_no != 0) %>% 
+  summarise(Frequency = n())
+
+# Calculate expected frequencies according to Benford's Law
+benford_frequencies <- data.frame(First_Digit_no = 1:9, Expected_Frequency = log10(1 + 1/(1:9)))
+
+# Create a bar plot to compare observed and expected frequencies
+ggplot() +
+  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit_no), y = Frequency), stat = "identity", fill = "blue", alpha = 0.6) +
+  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis") +
+  theme_minimal()
+```
+
+
+```{r}
+## Code for Task 1
+qnorm(0.25,2,5)
+qnorm(0.75,2,5)
+```
+
+```{r}
+#histogram plot of Uniform distribution
 uniform_data_1 <- runif(10000, min = 6.535898, max = 13.464101)
 hist(uniform_data_1, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
+png("histogram_u1.png")
+plot(hist(uniform_data_1, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency"))
+dev.off()
 ```
 ```{r}
+#histogram plot of Uniform distribution
 uniform_data_2<- runif(10000, min = -1.372449, max = 5.372449)
 hist(uniform_data_2, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
+png("histogram_u2.png")
+plot(hist(uniform_data_2, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency"))
+dev.off()
 ```
 ```{r}
+#histogram plot of Normal distribution
 data_norm <- rnorm(10000, mean = 2, sd = 5)
-hist(uniform_data, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency")
+hist(data_norm, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency")
+png("histogram_n.png")
+plot(hist(data_norm, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency"))
+dev.off()
 ```
 ```{r}
+#box plot of U1
 boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue")
+png("boxplot_u1.png")
+plot(boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue"))
+dev.off()
+#box plot of U2
 boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue")
+png("boxplot_u2.png")
+plot(boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue"))
+dev.off()
+#box plot of Normal distribution
 boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue")
+png("boxplot_n.png")
+plot(boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue"))
+dev.off()
 ```
+
+```{r}
+#bar plot of normal distribution simulation
+data <- rnorm(10000, mean = 2, sd = 5)
+sample_mean <- mean(data)
+sample_std_dev <- sd(data)
+
+# Create a data frame for plotting
+df <- data.frame(Category = "Data", Mean = sample_mean, SD = sample_std_dev)
+
+# Load necessary library for plotting
+library(ggplot2)
+
+# Create a bar plot with error bars
+plot1 <- ggplot(df, aes(x = Category, y = Mean)) +
+  geom_bar(stat = "identity", fill = "blue", alpha = 0.5) +
+  geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = 0.2, color = "red") +
+  labs(title = "Simulation of Normal Distribution",
+       x = "Category",
+       y = "Mean",
+       subtitle = paste("Mean = ", round(sample_mean, 2), ", SD = ", round(sample_std_dev, 2))) +
+  theme_minimal()
+
+png("bar_n.png")
+plot(plot1)
+dev.off()
+```
+
+
+```{r}
+#bar plot of unofrm distribution 1 simulation
+data <- runif(10000, min = 6.535898, max = 13.464101)
+sample_mean <- mean(data)
+sample_std_dev <- sd(data)
+
+# Create a data frame for plotting
+df <- data.frame(Category = "Data", Mean = sample_mean, SD = sample_std_dev)
+
+# Load necessary library for plotting
+library(ggplot2)
+
+# Create a bar plot with error bars
+plot1 <- ggplot(df, aes(x = Category, y = Mean)) +
+  geom_bar(stat = "identity", fill = "blue", alpha = 0.5) +
+  geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = 0.2, color = "red") +
+  labs(title = "Simulation of Uniform  1",
+       x = "Category",
+       y = "Mean",
+       subtitle = paste("Mean = ", round(sample_mean, 2), ", SD = ", round(sample_std_dev, 2))) +
+  theme_minimal()
+
+png("bar_u1.png")
+plot(plot1)
+dev.off()
+```
+
+```{r}
+#bar plot of unofrm distribution 2 simulation
+data <- runif(10000, min = -1.372449, max = 5.372449)
+sample_mean <- mean(data)
+sample_std_dev <- sd(data)
+
+# Create a data frame for plotting
+df <- data.frame(Category = "Data", Mean = sample_mean, SD = sample_std_dev)
+
+# Load necessary library for plotting
+library(ggplot2)
+
+# Create a bar plot with error bars
+plot1 <- ggplot(df, aes(x = Category, y = Mean)) +
+  geom_bar(stat = "identity", fill = "blue", alpha = 0.5) +
+  geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = 0.2, color = "red") +
+  labs(title = "Simulation of Uniform Distribution 2",
+       x = "Category",
+       y = "Mean",
+       subtitle = paste("Mean = ", round(sample_mean, 2), ", SD = ", round(sample_std_dev, 2))) +
+  theme_minimal()
+
+png("bar_u2.png")
+plot(plot1)
+dev.off()
+```
+
