@@ -7,9 +7,79 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Including Code
-You can include R code in the document as follows:
+#Task 1
+```{r Part B}
+# Load necessary libraries
+library(ggplot2)
 
+# Function to simulate German Tank Problem
+simulate_german_tank <- function(M, n, iterations) {
+  tank_estimates <- data.frame(MLE = numeric(iterations), MEAN = numeric(iterations), VAR = numeric(iterations))
+  
+  for (i in 1:iterations) {
+    captured_tanks <- sample(1:M, n, replace = FALSE)
+    tank_estimates$MLE[i] <- max(captured_tanks)
+    tank_estimates$MEAN[i] <- 2 * mean(captured_tanks) - 1
+    tank_estimates$VAR[i] <- max(captured_tanks) * (n + 1) / n - 1
+  }
+  
+  return(tank_estimates)
+}
+
+# Set parameters
+M_values <- c(100, 1000, 10000)  # Values of M to explore
+n_values <- seq(1, 100, by = 5)  # Values of n to explore
+iterations <- 1000  # Number of simulation iterations for each combination
+
+# Perform simulations for different values of M and n
+results <- expand.grid(M = M_values, n = n_values)
+simulations <- data.frame()
+
+for (i in 1:nrow(results)) {
+  M <- results$M[i]
+  n <- results$n[i]
+  tank_estimates <- simulate_german_tank(M, n, iterations)
+  
+  # Combine results and reset row names
+  simulation_result <- cbind(results[i, ], tank_estimates)
+  rownames(simulation_result) <- NULL
+  simulations <- rbind(simulations, simulation_result)
+}
+
+# Calculate mean and variance of the estimators
+mean_results <- aggregate(. ~ M + n, data = simulations, FUN = mean)
+variance_results <- aggregate(. ~ M + n, data = simulations, FUN = var)
+
+# Create a ggplot object
+plot_mean <- ggplot(mean_results, aes(x = n, y = MLE, color = factor(M))) +
+  geom_line(aes(y = MLE, linetype = "MLE"), show.legend = TRUE) +
+  geom_line(aes(y = MEAN, linetype = "MEAN")) +
+  geom_line(aes(y = VAR, linetype = "VAR")) +
+  labs(x = "n", y = "Estimate") +
+  scale_color_discrete(name = "M", labels = c("100", "1000", "10000")) +
+  labs(linetype = "Estimator") +
+  ggtitle("Mean Estimators for MLE, MEAN, and VAR for 1000 iterations") +
+  theme_minimal()
+
+# Print the plot
+print(plot_mean)
+
+# Create a ggplot object
+plot_var <- ggplot(variance_results, aes(x = n, y = MLE, color = factor(M))) +
+  geom_line(aes(y = MLE, linetype = "MLE"), show.legend = TRUE) +
+  geom_line(aes(y = MEAN, linetype = "MEAN")) +
+  geom_line(aes(y = VAR, linetype = "VAR")) +
+  labs(x = "n", y = "Estimate") +
+  scale_color_discrete(name = "M", labels = c("100", "1000", "10000")) +
+  labs(linetype = "Estimator") +
+  ggtitle("Variance Estimators for MLE, MEAN, and VAR for 1000 iterations") +
+  theme_minimal()
+
+# Print the plot
+print(plot_var)
+```
+
+#Task 2
 ```{r}
 library(readr)
 library(dplyr)
@@ -33,7 +103,7 @@ head(airport_routes, 10)
 #power 
 airdata =airport_routes$NumberOfRoutes
 x_min <- min(airdata[airdata > 0]) 
-a = 1 + length(airdata)/(sum(airdata/x_min))
+a = 1 + length(airdata)/(sum(log(airdata/x_min)))
 print(a)
 ```
 
@@ -69,7 +139,7 @@ print(sigmaval)
 #power 
 movdata =movie_votes$AverageVote
 x_min <- min(movdata[movdata > 0]) 
-a = 1 + length(movdata)/(sum(movdata/x_min))
+a = 1 + length(movdata)/(sum(log(movdata/x_min)))
 print(a)
 ```
 
