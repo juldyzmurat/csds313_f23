@@ -1,0 +1,255 @@
+---
+title: "CSDS313 - Homework2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Including Code
+You can include R code in the document as follows:
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(rvest)
+```
+```{r}
+movie_votes <- read.csv("movie_votes.csv")
+airport_routes <- read.csv('airport_routes.csv')
+```
+```{r}
+head(movie_votes, 10)
+```
+```{r}
+head(airport_routes, 10)
+```
+```
+#Airports data 
+
+```{r}
+#power 
+airdata =airport_routes$NumberOfRoutes
+x_min <- min(airdata[airdata > 0]) 
+a = 1 + length(airdata)/(sum(airdata/x_min))
+print(a)
+```
+
+```{r}
+#exponential 
+airdata =airport_routes$NumberOfRoutes
+lambda = length(airdata)/sum(airdata)
+print(lambda)
+```
+ 
+```{r}
+#uniform 
+airdata =airport_routes$NumberOfRoutes
+a = min(airdata)
+b = max(airdata)
+print(a)
+print(b)
+```
+
+```{r}
+#normal 
+airdata =airport_routes$NumberOfRoutes
+mu = sum(airdata)/length(airdata)
+sigmaval = sqrt(sum((airdata-mu)**2)/length(airdata))
+print(mu)
+print(sigmaval)
+```
+
+#Plotting emperical data and function generated data 
+
+#Moviedata 
+```{r}
+#power 
+movdata =movie_votes$AverageVote
+x_min <- min(movdata[movdata > 0]) 
+a = 1 + length(movdata)/(sum(movdata/x_min))
+print(a)
+```
+
+```{r}
+#exponential 
+movdata =movie_votes$AverageVote
+lambda = length(movdata)/sum(movdata)
+print(lambda)
+```
+
+```{r}
+#uniform 
+movdata =movie_votes$AverageVote
+a = min(movdata)
+b = max(movdata)
+print(a)
+print(b)
+```
+
+```{r}
+#normal 
+movdata =movie_votes$AverageVote
+mu = sum(movdata)/length(movdata)
+sigmaval = sqrt(sum((movdata-mu)**2)/length(movdata))
+print(mu)
+print(sigmaval)
+```
+
+```{r}
+# Load required packages
+library(ggplot2)
+library(gridExtra)
+
+# Sample size
+movdata =movie_votes$AverageVote
+n <- length(movdata)
+
+# Generate empirical data (e.g., random data)
+empirical_data <- movdata
+
+# Generate synthetic data for different distributions
+power_data <- rpower(n, alpha = 1.3)
+exponential_data <- rexp(n, rate = 0.161)
+uniform_data <- runif(n, min = 1.9, max = 8.5)
+normal_data <- rnorm(n, mean = 6.227, sd = 0.893)
+
+# Create separate density plots for each distribution
+plot_empirical <- ggplot(data.frame(x = empirical_data), aes(x)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Empirical Data") +
+  theme(
+    plot.title = element_text(size = 20),  # Adjust the plot title font size
+    axis.title = element_text(size = 18),   # Adjust the axis label font size
+    legend.text = element_text(size = 16),  # Adjust the legend item font size
+    axis.text = element_text(size = 16)  # Adjust the axis tick font size
+  )
+
+plot_power <- ggplot(data.frame(x = power_data), aes(x)) +
+  geom_density(fill = "green", alpha = 0.5) +
+  labs(title = "Power Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_exponential <- ggplot(data.frame(x = exponential_data), aes(x)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "Exponential Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_uniform <- ggplot(data.frame(x = uniform_data), aes(x)) +
+  geom_density(fill = "purple", alpha = 0.5) +
+  labs(title = "Uniform Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_normal <- ggplot(data.frame(x = normal_data), aes(x)) +
+  geom_density(fill = "orange", alpha = 0.5) +
+  labs(title = "Normal Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+
+# Print each plot individually
+ggsave("empirical_plot_movie.png", plot = plot_empirical, width = 10, height = 8, dpi = 300)
+ggsave("power_distribution_plot_movie.png", plot = plot_power, width = 10, height = 8, dpi = 300)
+ggsave("exponential_distribution_plot_movie.png", plot = plot_exponential, width = 10, height = 8, dpi = 300)
+ggsave("uniform_distribution_plot_movie.png", plot = plot_uniform, width = 10, height = 8, dpi = 300)
+ggsave("normal_distribution_plot_movie.png", plot = plot_normal, width = 10, height = 8, dpi = 300)
+```
+
+```{r}
+# Load required packages
+library(ggplot2)
+library(gridExtra)
+
+# Sample size
+airdata =airport_routes$NumberOfRoutes
+n <- length(airdata)
+
+# Generate empirical data (e.g., random data)
+empirical_data <- airdata
+
+# Generate synthetic data for different distributions
+power_data <- rpower(n, alpha = 1.05)
+exponential_data <- rexp(n, rate = 0.05)
+uniform_data <- runif(n, min = 1, max = 915)
+normal_data <- rnorm(n, mean = 19.845, sd = 53.499)
+
+# Create separate density plots for each distribution
+plot_empirical <- ggplot(data.frame(x = empirical_data), aes(x)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Empirical Data") +
+  theme(
+    plot.title = element_text(size = 20),  # Adjust the plot title font size
+    axis.title = element_text(size = 18),   # Adjust the axis label font size
+    legend.text = element_text(size = 16),  # Adjust the legend item font size
+    axis.text = element_text(size = 16)  # Adjust the axis tick font size
+  )
+
+plot_power <- ggplot(data.frame(x = power_data), aes(x)) +
+  geom_density(fill = "green", alpha = 0.5) +
+  labs(title = "Power Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_exponential <- ggplot(data.frame(x = exponential_data), aes(x)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "Exponential Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_uniform <- ggplot(data.frame(x = uniform_data), aes(x)) +
+  geom_density(fill = "purple", alpha = 0.5) +
+  labs(title = "Uniform Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+plot_normal <- ggplot(data.frame(x = normal_data), aes(x)) +
+  geom_density(fill = "orange", alpha = 0.5) +
+  labs(title = "Normal Distribution") +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    axis.text = element_text(size = 16)
+  )
+
+
+# Print each plot individually
+ggsave("empirical_plot_airport.png", plot = plot_empirical, width = 10, height = 8, dpi = 300)
+ggsave("power_distribution_plot_airport.png", plot = plot_power, width = 10, height = 8, dpi = 300)
+ggsave("exponential_distribution_plot_airport.png", plot = plot_exponential, width = 10, height = 8, dpi = 300)
+ggsave("uniform_distribution_plot_airport.png", plot = plot_uniform, width = 10, height = 8, dpi = 300)
+ggsave("normal_distribution_plot_airport.png", plot = plot_normal, width = 10, height = 8, dpi = 300)
+```
