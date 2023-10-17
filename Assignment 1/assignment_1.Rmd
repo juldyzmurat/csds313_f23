@@ -11,40 +11,62 @@ knitr::opts_chunk$set(echo = TRUE)
 You can include R code in the document as follows:
 
 ```{r}
-install.packages("readr")
-install.packages("dplyr")
-install.packages("ggplot2")
-install.packages("rvest")
+#install.packages("readr")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("rvest")
+#install.packages("ggploart2")
+library(rvest)
 library(readr)
 library(dplyr)
 library(ggplot2)
 library(rvest)
+library(vroom)
 ```
 
 ```{r}
 ## Code for Task 1
 # Loading dataset
-data <- read_csv("sub-est2022.csv")
+data <- read_csv("/Users/ualik103648/Documents/GitHub/csds313_f23/sub-est2022.csv")
 
+head(data,10)
+```
+```{r}
 # Extract first digits from the numerical column i.e the estimate base population in 2020
 first_digits <- data %>%
   filter(is.numeric(ESTIMATESBASE2020)) %>%
   mutate(First_Digit = as.integer(substr(abs(ESTIMATESBASE2020), 1, 1)))
+print(first_digits)
+```
 
+```{r}
 # Calculate observed frequencies
 observed_frequencies <- first_digits %>%
   group_by(First_Digit) %>% 
   filter(First_Digit != 0) %>% 
   summarise(Frequency = n())
+```
 
+
+```{r}
 # Calculate expected frequencies according to Benford's Law
 benford_frequencies <- data.frame(First_Digit = 1:9, Expected_Frequency = log10(1 + 1/(1:9)))
 
-# Create a bar plot to compare observed and expected frequencies
+# Define a larger scaling factor
+scaling_factor <- 100000
+
+# Scale the expected frequencies
+benford_frequencies$Expected_Frequency <- benford_frequencies$Expected_Frequency * scaling_factor
+
+# Create a bar plot to compare observed and scaled expected frequencies
 ggplot() +
-  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit), y = Frequency), stat = "identity", fill = "blue", alpha = 0.6) +
-  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis") +
-  theme_minimal()
+  geom_bar(data = benford_frequencies, aes(x = factor(First_Digit), y = Expected_Frequency, fill = "Expected"), stat = "identity", alpha = 0.6) +
+  geom_bar(data = observed_frequencies, aes(x = factor(First_Digit), y = Frequency, fill = "Observed"), stat = "identity", alpha = 1) +
+  labs(x = "First Digit", y = "Frequency", title = "Benford's Law Analysis on POPULATION") +
+  scale_fill_manual(values = c("Observed" = "blue", "Expected" = "red")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = guide_legend(title = "Frequency Source"))
 ```
 
 ```{r}
@@ -99,49 +121,89 @@ qnorm(0.75,2,5)
 
 ```{r}
 #histogram plot of Uniform distribution
-uniform_data_1 <- runif(10000, min = 6.535898, max = 13.464101)
+uniform_data_1 <- runif(10000, min = 2-5*sqrt(3), max = 2+5*sqrt(3))
 hist(uniform_data_1, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
 png("histogram_u1.png")
 plot(hist(uniform_data_1, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency"))
 dev.off()
 ```
+
 ```{r}
-#histogram plot of Uniform distribution
-uniform_data_2<- runif(10000, min = -1.372449, max = 5.372449)
-hist(uniform_data_2, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency")
-png("histogram_u2.png")
-plot(hist(uniform_data_2, main = "Simulated Uniform Distribution", xlab = "Value", ylab = "Frequency"))
+set.seed(123)
+unif_data <- runif(1000, min = 2 - 5 * sqrt(3), max = 2 + 5 * sqrt(3))
+norm_data <- rnorm(1000, mean = 2, sd = 5)
+
+par(mar = c(5, 6, 4, 2) + 0.1)
+
+# Create the histogram of the uniform distribution
+hist(unif_data, main = "Uniform vs Normal Distribution", col = "blue", xlim = c(-20, 20), ylim = c(0, 0.10), probability = TRUE, xlab = "Value", ylab = "Probability density", cex.lab = 2,cex.main = 4)
+
+# Overlay the density plot of the normal distribution
+par(new = TRUE)
+lines(density(norm_data), col = "red", lwd = 2)
+
+# Set x-axis limits and labels
+axis(1, at = seq(-20, 20, by = 5))
+#axis(2, at = seq(0, 0.1,by=0.02))
+
+# Add legend
+legend("topright", legend = c("Uniform", "Normal"), col = c("blue", "red"), lwd = c(2, 2), pch = c(NA, NA))
+png("a1b1_norm.png") 
 dev.off()
 ```
 ```{r}
-#histogram plot of Normal distribution
-data_norm <- rnorm(10000, mean = 2, sd = 5)
-hist(data_norm, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency")
-png("histogram_n.png")
-plot(hist(data_norm, main = "Simulated Normal Distribution", xlab = "Value", ylab = "Frequency"))
-dev.off()
-```
-```{r}
-#box plot of U1
-boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue")
-png("boxplot_u1.png")
-plot(boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue"))
-dev.off()
-#box plot of U2
-boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue")
-png("boxplot_u2.png")
-plot(boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue"))
-dev.off()
-#box plot of Normal distribution
-boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue")
-png("boxplot_n.png")
-plot(boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue"))
+set.seed(123)
+unif_data <- runif(1000, min = -4.74, max = 8.74)
+norm_data <- rnorm(1000, mean = 2, sd = 5)
+
+unif_quantile <- quantile(unif_data, probs = c(0.25, 0.75))
+norm_quantile <- quantile(norm_data, probs = c(0.25, 0.75))
+
+#plot(density(unif_data), type="n", xlim=c(-20,20), ylim=c(0,0.1), xlab="", ylab="")
+hist(unif_data, main = "Uniform vs Normal Distribution", col = "blue", xlim = c(-20, 20), ylim = c(0, 0.10), probability = TRUE, xlab = "Value", ylab = "Probability density", cex.lab = 2,cex.main = 4)
+
+par(new=TRUE)
+#plot(density(norm_data), type="n", xlim=c(-20,20), xlab="", ylab="", yaxt="n") 
+lines(density(norm_data), col="red", ylim=c(0,0.1),lwd=2)
+segments(norm_quantile, 0, norm_quantile, 0.1, col = "pink", lwd = 5)
+segments(unif_quantile, 0, unif_quantile, 0.1, col = "green", lty = 5)
+
+
+legend("topright", legend=c("Uniform", "Normal"), col=c("blue", "red"), lwd=c(2,2))
+png("a2b2_norm.png") 
 dev.off()
 ```
 
 ```{r}
-#bar plot of normal distribution simulation
-data <- rnorm(10000, mean = 2, sd = 5)
+uniform_data_1 = runif(1000, min = 2 - 5 * sqrt(3), max = 2 + 5 * sqrt(3))
+uniform_data_2 = runif(1000, min = -4.74, max = 8.74)
+data_norm = rnorm(1000, mean = 2, sd = 5)
+
+# Set the size of tick labels and main title
+par(cex.axis = 3, cex.main = 4)
+
+# Create boxplot of Uniform Distribution U1
+boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue", names.arg = "")
+png("boxplot_u1.png")
+plot(boxplot(uniform_data_1, main = "Uniform Distribution U1", ylab = "Value", col = "lightblue", names.arg = "",cex.lab=1))
+dev.off()
+
+# Create boxplot of Uniform Distribution U2
+boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue", names.arg = "")
+png("boxplot_u2.png")
+plot(boxplot(uniform_data_2, main = "Uniform Distribution U2", ylab = "Value", col = "lightblue", names.arg = "",cex.lab=1))
+dev.off()
+
+# Create boxplot of Normal Distribution
+boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue", names.arg = "")
+png("boxplot_n.png")
+plot(boxplot(data_norm, main = "Normal Distribution N(2, 5)", ylab = "Value", col = "lightblue", names.arg = "",cex.lab=1))
+dev.off()
+
+```
+```{r}
+#bar plot of unofrm distribution 1 simulation
+data <- rnorm(1000, mean = 2, sd = 5)
 sample_mean <- mean(data)
 sample_std_dev <- sd(data)
 
@@ -155,7 +217,7 @@ library(ggplot2)
 plot1 <- ggplot(df, aes(x = Category, y = Mean)) +
   geom_bar(stat = "identity", fill = "blue", alpha = 0.5) +
   geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width = 0.2, color = "red") +
-  labs(title = "Simulation of Normal Distribution",
+  labs(title = "Simulation of Normal  Distribution",
        x = "Category",
        y = "Mean",
        subtitle = paste("Mean = ", round(sample_mean, 2), ", SD = ", round(sample_std_dev, 2))) +
@@ -165,11 +227,9 @@ png("bar_n.png")
 plot(plot1)
 dev.off()
 ```
-
-
 ```{r}
 #bar plot of unofrm distribution 1 simulation
-data <- runif(10000, min = 6.535898, max = 13.464101)
+data <- runif(1000, min = 2 - 5 * sqrt(3), max = 2 + 5 * sqrt(3))
 sample_mean <- mean(data)
 sample_std_dev <- sd(data)
 
@@ -196,7 +256,7 @@ dev.off()
 
 ```{r}
 #bar plot of unofrm distribution 2 simulation
-data <- runif(10000, min = -1.372449, max = 5.372449)
+data <- runif(1000, min = -4.74, max = 8.74)
 sample_mean <- mean(data)
 sample_std_dev <- sd(data)
 
